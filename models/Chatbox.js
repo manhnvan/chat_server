@@ -1,8 +1,13 @@
 const mongoose = require('mongoose');
 
 const ChatboxSchema = mongoose.Schema({
-	members: {
-		type: [ { id: mongoose.Schema.Types.ObjectId, name: String } ]
+	ownerId: {
+		type: mongoose.Schema.Types.ObjectId,
+		required: true
+	},
+	ownerName: {
+		type: String,
+		required: true
 	},
 	messages: {
 		type: [
