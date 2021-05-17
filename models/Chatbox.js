@@ -1,23 +1,18 @@
 const mongoose = require('mongoose');
 
 const ChatboxSchema = mongoose.Schema({
-	ownerId: {
+	participants: [
+		mongoose.Schema.Types.ObjectId
+	],
+	avatar: String,
+	topic: String,
+	created: {
+		type: Date,
+		default: Date.now,
+	},
+	lastMessage: {
 		type: mongoose.Schema.Types.ObjectId,
-		required: true
-	},
-	ownerName: {
-		type: String,
-		required: true
-	},
-	messages: {
-		type: [
-			{
-				senderId: mongoose.Schema.Types.ObjectId,
-				content: String,
-				senderName: String
-			}
-		],
-		defautl: []
+		ref: 'message'
 	}
 });
 

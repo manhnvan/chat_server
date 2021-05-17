@@ -7,6 +7,7 @@ const http = require('http').createServer(app);
 require('dotenv').config();
 const mongoose = require('mongoose');
 const Chatbox = require('./models/Chatbox');
+const Message = require('./models/Message')
 mongoose
 	.connect(process.env.URI, {
 		useUnifiedTopology: true,
@@ -25,9 +26,9 @@ const { addUser, removeUser, getUser, getUserInRoom } = require('./user');
 
 var io = require('socket.io')(http, {
 	cors: {
-		origin: 'https://localhost:3002',
-		methods: [ 'GET', 'POST' ],
-		allowedHeaders: [ 'my-custom-header' ],
+		origin: 'http://localhost:3002',
+		methods: ['GET', 'POST'],
+		allowedHeaders: ['my-custom-header'],
 		credentials: true
 	}
 });
@@ -38,23 +39,20 @@ const chatboxRouter = require('./chatboxRouter');
 app.use('/', chatboxRouter);
 
 io.on('connection', (socket) => {
-	socket.on('join', ({ name, chatboxId }) => {
+	socket.on('join', (chatboxId) => {
+		console.log(`${chatboxId} has been connected`)
 		socket.join(chatboxId);
 	});
 
 	socket.on('sendMessage', async (message) => {
-		const { chatboxId, content, senderId, senderName } = message;
+		const { chatbox, content, sender, images, from } = message;
 		console.log(message);
-		await Chatbox.findByIdAndUpdate(message.chatboxId, {
-			$push: {
-				messages: {
-					senderId,
-					senderName,
-					content
-				}
-			}
+		const newMessage = new Message({
+			chatbox, from, sender, content, images
 		});
-		io.to(chatboxId).emit('message', message);
+		const savedMessage = await newMessage.save();
+		await Chatbox.findByIdAndUpdate(chatbox, {lastMessage: savedMessage._id });
+		io.to(chatbox).emit('message', savedMessage);
 	});
 	socket.on('disconnect', () => {
 		console.log('user disconnected');
