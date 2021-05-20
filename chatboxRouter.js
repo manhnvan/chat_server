@@ -33,6 +33,11 @@ route.post('/createChatbox', async (req, res, next) => {
 			})
 		} else {
 			const chatbox = new ChatBox({participants, topic, avatar});
+			const newMessage = new Message({
+				chatbox: chatbox._id, from: chatbox._id, sender: 'Admin', content: 'Hãy trao đổi với người bán để được thỏa thuận tốt nhất !!!', images: []
+			});
+			await newMessage.save()
+			chatbox.lastMessage = newMessage._id;
 			const savedChatbox = await chatbox.save();
 			return res.status(200).json({
 				success: true, 
@@ -59,7 +64,6 @@ route.get('/:participant', async (req, res, next) => {
 			}
 		}).populate('lastMessage')
 
-		console.log(chatboxes);
 		return res.status(200).json({
 			success: true,
 			msg: 'success',
