@@ -19,11 +19,12 @@ const verifyToken = (req, res, next) => {
 
 route.post('/createChatbox', async (req, res, next) => {
 	try {
-		const { participants, topic, avatar } = req.body
+		const { participants, topic, avatar, productId } = req.body
 		const isExist = await ChatBox.findOne({
 			participants: {
 				$all: [...participants],
-			}
+			},
+			productId: productId
 		})
 		if (isExist) {
 			return res.status(200).json({
@@ -32,7 +33,7 @@ route.post('/createChatbox', async (req, res, next) => {
 				chatbox: isExist
 			})
 		} else {
-			const chatbox = new ChatBox({participants, topic, avatar});
+			const chatbox = new ChatBox({participants, topic, avatar, productId});
 			const newMessage = new Message({
 				chatbox: chatbox._id, from: chatbox._id, sender: 'Admin', content: 'Hãy trao đổi với người bán để được thỏa thuận tốt nhất !!!', images: []
 			});

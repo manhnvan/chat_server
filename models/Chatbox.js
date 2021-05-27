@@ -10,6 +10,7 @@ const ChatboxSchema = mongoose.Schema({
 		type: Date,
 		default: Date.now,
 	},
+	productId: mongoose.Schema.Types.ObjectId,
 	lastMessage: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'message'
