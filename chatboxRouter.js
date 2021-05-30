@@ -1,6 +1,8 @@
 const route = require('express').Router();
 const ChatBox = require('./models/Chatbox');
 const Message = require('./models/Message');
+const Customer = require('./models/Customer');
+const Seller = require('./models/Seller');
 const jwt = require('jsonwebtoken');
 
 const verifyToken = (req, res, next) => {
@@ -51,6 +53,36 @@ route.post('/createChatbox', async (req, res, next) => {
 		return res.status(200).json({
 			success: 200,
 			msg: 'fail to create chatbox'
+		});
+	}
+});
+
+route.get('/participants/:chatboxId', async (req, res, next) => {
+	try {
+		const {chatboxId} = req.params
+		const chatbox = await ChatBox.findById(chatboxId);
+		const participants =  chatbox.participants;
+		const peopleInChatbox = {};
+		const customers = await Customer.find({
+			_id: participants
+		})
+		const sellers = await Seller.find({
+			_id: participants
+		})
+		const people = [...sellers, ... customers];
+		people.forEach(person => {
+			peopleInChatbox[person._id] = person
+		})
+		return res.status(200).json({
+			success: true,
+			msg: 'success',
+			peopleInChatbox: peopleInChatbox
+		})
+	} catch (e) {
+		console.log(e);
+		return res.status(200).json({
+			success: false,
+			msg: 'fail to get participant infomation'
 		});
 	}
 });
