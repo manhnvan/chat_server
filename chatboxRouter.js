@@ -57,12 +57,13 @@ route.post('/createChatbox', async (req, res, next) => {
 	}
 });
 
-route.get('/participants/:chatboxId', async (req, res, next) => {
+route.get('/participants/:chatboxId/:currentUserId', async (req, res, next) => {
 	try {
-		const {chatboxId} = req.params
+		const {chatboxId, currentUserId} = req.params
 		const chatbox = await ChatBox.findById(chatboxId);
-		const participants =  chatbox.participants;
-		const peopleInChatbox = {};
+		const participants =  chatbox.participants.filter(participant => {
+			return participant != currentUserId
+		});
 		const customers = await Customer.find({
 			_id: participants
 		})
@@ -70,13 +71,10 @@ route.get('/participants/:chatboxId', async (req, res, next) => {
 			_id: participants
 		})
 		const people = [...sellers, ... customers];
-		people.forEach(person => {
-			peopleInChatbox[person._id] = person
-		})
 		return res.status(200).json({
 			success: true,
 			msg: 'success',
-			peopleInChatbox: peopleInChatbox
+			peopleInChatbox: people[0]
 		})
 	} catch (e) {
 		console.log(e);
